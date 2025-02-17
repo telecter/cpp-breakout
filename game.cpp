@@ -8,12 +8,13 @@ class Paddle
 public:
     sf::RenderWindow &window;
     sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(150, 30));
-    float dx = 0;
+    float dx;
 
     Paddle(sf::RenderWindow &window) : window(window)
     {
-        shape.setPosition(sf::Vector2f(window.getSize().x / 2, window.getSize().y - 50));
         shape.setFillColor(sf::Color::Magenta);
+        reset();
+        
     }
     void reset()
     {
@@ -65,13 +66,13 @@ class Ball
 public:
     sf::RenderWindow &window;
     sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(15, 15));
-    float dx = 0.05;
-    float dy = 0.05;
+    float dx;
+    float dy;
 
     Ball(sf::RenderWindow &window) : window(window)
     {
         shape.setFillColor(sf::Color::Red);
-        shape.setPosition(sf::Vector2f(window.getSize().x / 2, window.getSize().y / 2));
+        reset();
     }
 
     void handleWallCollision()
