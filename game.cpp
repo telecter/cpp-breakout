@@ -3,18 +3,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+sf::Color colors[] = {sf::Color::Red, sf::Color::Blue, sf::Color::Magenta, sf::Color::Cyan, sf::Color::Green};
+
 class Paddle
 {
 public:
-    sf::RenderWindow &window;
-    sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(150, 30));
+    float speed = 0.15;
+    int width = 170;
+    int height = 25;
+
     float dx;
+    sf::RenderWindow &window;
+    sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(width, height));
 
     Paddle(sf::RenderWindow &window) : window(window)
     {
         shape.setFillColor(sf::Color::Magenta);
         reset();
-        
     }
     void reset()
     {
@@ -42,11 +47,11 @@ public:
     {
         if (key->code == sf::Keyboard::Key::Left)
         {
-            dx = -0.05;
+            dx = -speed;
         }
         else if (key->code == sf::Keyboard::Key::Right)
         {
-            dx = 0.05;
+            dx = speed;
         }
     }
     void onKeyReleased(sf::Event::KeyReleased const *key)
@@ -64,10 +69,13 @@ public:
 class Ball
 {
 public:
-    sf::RenderWindow &window;
-    sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(15, 15));
+    float speed = 0.05;
+    int diameter = 20;
+
     float dx;
     float dy;
+    sf::RenderWindow &window;
+    sf::CircleShape shape = sf::CircleShape(diameter/2);
 
     Ball(sf::RenderWindow &window) : window(window)
     {
@@ -79,18 +87,18 @@ public:
     {
         sf::Vector2f pos = shape.getPosition();
         sf::Vector2u windowSize = window.getSize();
-
-        if (pos.x + shape.getSize().x > windowSize.x || pos.x < 0)
+    
+        if (pos.x + diameter > windowSize.x || pos.x < 0)
             dx = -dx;
-        if (pos.y + shape.getSize().y > windowSize.y || pos.y < 0)
+        if (pos.y + diameter > windowSize.y || pos.y < 0)
             dy = -dy;
     }
 
     void reset()
     {
         shape.setPosition(sf::Vector2f(window.getSize().x / 2, window.getSize().y / 2));
-        dx = 0.05;
-        dy = 0.05;
+        dx = speed;
+        dy = -speed;
     }
 
     void draw()
@@ -105,13 +113,16 @@ public:
 class Brick
 {
 public:
-    sf::RenderWindow &window;
-    sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(140, 40));
+    int width = 140;
+    int height = 40;
+
     bool shouldRender = true;
+    sf::RenderWindow &window;
+    sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(width, height));
 
     Brick(sf::RenderWindow &window, float x, float y) : window(window)
     {
-        shape.setFillColor(sf::Color::Blue);
+        shape.setFillColor(colors[rand() % (sizeof(colors)/sizeof(colors)[0])]);
         shape.setPosition(sf::Vector2f(x, y));
     };
     void reset()
@@ -146,7 +157,6 @@ std::vector<Brick> createBricks(sf::RenderWindow &window)
     return bricks;
 }
 
-
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({1010, 800}), "C++ Breakout");
@@ -161,7 +171,7 @@ int main()
 
     sf::Text scoreText(arial);
     scoreText.setString("0");
-    scoreText.setPosition(sf::Vector2f(20, window.getSize().y-50));
+    scoreText.setPosition(sf::Vector2f(20, window.getSize().y - 50));
 
     int score = 0;
 
@@ -208,8 +218,8 @@ int main()
 
         sf::Vector2f ballPos = ball.shape.getPosition();
         sf::Vector2f paddlePos = paddle.shape.getPosition();
-        if (ballPos.y > paddlePos.y - paddle.shape.getSize().y && ballPos.x + ball.shape.getSize().x > paddlePos.x &&
-            ballPos.x < paddlePos.x + paddle.shape.getSize().x)
+        if (ballPos.y > paddlePos.y - paddle.height && ballPos.x + ball.diameter > paddlePos.x &&
+            ballPos.x < paddlePos.x + paddle.width && ballPos.y < paddlePos.y)
         {
             ball.dy = -ball.dy;
         }
@@ -228,13 +238,16 @@ int main()
             brick.draw();
 
             sf::Vector2f brickPos = brick.shape.getPosition();
-            if (ballPos.y > brickPos.y - brick.shape.getSize().y && ballPos.x + ball.shape.getSize().x > brickPos.x &&
-                ballPos.x < brickPos.x + brick.shape.getSize().x && ballPos.y < brickPos.y)
+            if (ballPos.y > brickPos.y - brick.height && ballPos.x + ball.diameter > brickPos.x &&
+                ballPos.x < brickPos.x + brick.width && ballPos.y - ball.diameter < brickPos.y)
             {
-                if (brick.shouldRender) {
+                if (brick.shouldRender)
+                {
                     brick.shouldRender = false;
                     score++;
                     scoreText.setString(std::to_string(score));
+
+                    ball.dy = -ball.dy;
                 }
             }
         }
