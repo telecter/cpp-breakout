@@ -69,7 +69,7 @@ public:
 class Ball
 {
 public:
-    const float speed = 0.05;
+    const float speed = 0.08;
     const int diameter = 20;
 
     float dx;
@@ -141,12 +141,12 @@ public:
 std::vector<Brick> createBricks(sf::RenderWindow &window)
 {
     std::vector<Brick> bricks;
-    bricks.reserve(24);
+    bricks.reserve(40);
     float currentBrickX = 10;
     float currentBrickY = 10;
     for (int y = 0; y < 4; y++)
     {
-        for (int x = 0; x < 6; x++)
+        for (int x = 0; x < 10; x++)
         {
             bricks.push_back(Brick(window, currentBrickX, currentBrickY));
             currentBrickX += 170;
@@ -159,7 +159,7 @@ std::vector<Brick> createBricks(sf::RenderWindow &window)
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({1010, 800}), "C++ Breakout");
+    sf::RenderWindow window(sf::VideoMode({1515, 1000}), "C++ Breakout");
 
     sf::Font arial("/usr/share/fonts/open-sans/OpenSans-Regular.ttf");
     sf::Text gameOverText(arial);
