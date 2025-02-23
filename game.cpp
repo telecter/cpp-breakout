@@ -8,9 +8,9 @@ sf::Color colors[] = {sf::Color::Red, sf::Color::Blue, sf::Color::Magenta, sf::C
 class Paddle
 {
 public:
-    float speed = 0.15;
-    int width = 170;
-    int height = 25;
+    const float speed = 0.15;
+    const int width = 170;
+    const int height = 25;
 
     float dx;
     sf::RenderWindow &window;
@@ -69,13 +69,13 @@ public:
 class Ball
 {
 public:
-    float speed = 0.05;
-    int diameter = 20;
+    const float speed = 0.05;
+    const int diameter = 20;
 
     float dx;
     float dy;
     sf::RenderWindow &window;
-    sf::CircleShape shape = sf::CircleShape(diameter/2);
+    sf::CircleShape shape = sf::CircleShape(diameter / 2);
 
     Ball(sf::RenderWindow &window) : window(window)
     {
@@ -87,7 +87,7 @@ public:
     {
         sf::Vector2f pos = shape.getPosition();
         sf::Vector2u windowSize = window.getSize();
-    
+
         if (pos.x + diameter > windowSize.x || pos.x < 0)
             dx = -dx;
         if (pos.y + diameter > windowSize.y || pos.y < 0)
@@ -113,8 +113,8 @@ public:
 class Brick
 {
 public:
-    int width = 140;
-    int height = 40;
+    const int width = 140;
+    const int height = 40;
 
     bool shouldRender = true;
     sf::RenderWindow &window;
@@ -122,7 +122,7 @@ public:
 
     Brick(sf::RenderWindow &window, float x, float y) : window(window)
     {
-        shape.setFillColor(colors[rand() % (sizeof(colors)/sizeof(colors)[0])]);
+        shape.setFillColor(colors[rand() % (sizeof(colors) / sizeof(colors)[0])]);
         shape.setPosition(sf::Vector2f(x, y));
     };
     void reset()
@@ -168,6 +168,9 @@ int main()
     sf::Vector2f localBounds = center + gameOverText.getLocalBounds().position;
     gameOverText.setOrigin(localBounds);
     gameOverText.setPosition(sf::Vector2f{window.getSize() / 2u});
+
+    sf::Text winText = gameOverText;
+    winText.setString("You win!");
 
     sf::Text scoreText(arial);
     scoreText.setString("0");
@@ -224,19 +227,15 @@ int main()
             ball.dy = -ball.dy;
         }
 
-        if (ballPos.y > paddlePos.y)
-        {
-            window.draw(gameOverText);
-            ball.dx = 0;
-            ball.dy = 0;
-        }
+    
 
         ball.draw();
         paddle.draw();
+
+        int bricksRemoved = 0;
         for (auto &brick : bricks)
         {
             brick.draw();
-
             sf::Vector2f brickPos = brick.shape.getPosition();
             if (ballPos.y > brickPos.y - brick.height && ballPos.x + ball.diameter > brickPos.x &&
                 ballPos.x < brickPos.x + brick.width && ballPos.y - ball.diameter < brickPos.y)
@@ -250,7 +249,21 @@ int main()
                     ball.dy = -ball.dy;
                 }
             }
+            if (!brick.shouldRender) bricksRemoved++;
         }
+
+        if (ballPos.y > paddlePos.y)
+        {
+            window.draw(gameOverText);
+            ball.dx = 0;
+            ball.dy = 0;
+        }
+        if (bricksRemoved >= bricks.size()) {
+            window.draw(winText);
+            ball.dx = 0;
+            ball.dy = 0;
+        }
+
         window.draw(scoreText);
 
         window.display();
